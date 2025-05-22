@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="description" content="Pet Ownership During the Pandemic"/>
+    <meta name="keywords" content="HTML, CSS, pets, pandemic, COVID-19"/>
+    <meta name="author" content="Arlene Phuong Brown"/>
+
+    <title>Pet Ownership During the COVID Pandemic</title>
+    
+    <!-- External CSS file -->
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <!-- Header section  -->
+    <header>
+        <h1>The Rise of Pet Ownership During COVID-19</h1>
+        <h2>Understanding Australia's Pandemic Pet Boom</h2>
+        <nav>
+            <ul>
+                <li><a href="#introduction">Introduction</a></li>
+                <li><a href="#statistics">Statistics</a></li>
+                <li><a href="#benefits">Benefits</a></li>
+                <li><a href="#policy">Policy Implications</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <!-- Introduction section -->
+        <section id="introduction">
+            <h2>Introduction</h2>
+            <p>A report from Animal Medicines Australia (AMA) has found that many Australians took the opportunity to introduce a pet into their household during the pandemic. Their survey indicated that there was a significant increase in the percent of households taking in a new dog, fish or bird.</p>
+            
+            <div class="image-gallery">
+                <figure>
+                    <img src="resources/cat.jpg" alt="Tabby cat sitting">
+                    <figcaption>Cat ownership increased by 3% from 2019 to 2021</figcaption>
+                </figure>
+                <figure>
+                    <img src="resources/dog.png" alt="Golden retriever sitting in grass">
+                    <figcaption>Dog ownership saw the largest increase, rising 7% during the pandemic</figcaption>
+                </figure>
+                <figure>
+                    <img src="resources/fish.jpg" alt="Orange fish in blue water">
+                    <figcaption>Fish ownership increased by 2% between 2019 and 2021</figcaption>
+                </figure>
+            </div>
+        </section>
+
+        <!-- Statistics section  -->
+        <section id="statistics">
+            <h2>Pet Ownership Statistics</h2>
+            <p>The data reveals a significant increase in pet ownership during the COVID-19 pandemic. From 2019 to 2021, overall pet ownership in Australian households increased from 61% to 69%.</p>
+            
+			<figure class="wide-figure">
+				<img src="resources/pet_ownership_in_australia_table.png" alt="Pet ownership in Australia, 2019 vs 2021 data table" style="width: 100%; max-width: none; height: auto;">
+				<figcaption>Fig 1. Comparison of Pet Ownership in 2019 and 2021. Data Source: <a href="https://animalmedicinesaustralia.org.au/wp-content/uploads/2021/08/AMAU005-PATP-Report21_v1.41_WEB.pdf" target="_blank">Animal Medicines Australia Report</a></figcaption>
+			</figure>
+            
+            <p>As shown in the table above, dogs saw the largest increase in household penetration, rising from 40% to 47% between 2019 and 2021. Bird ownership also experienced significant growth, increasing from 9% to 14% during the pandemic period.</p>
+        </section>
+
+        <!-- Benefits section -->
+        <section id="benefits">
+            <h2>Benefits of Pet Ownership</h2>
+            <p>The AMA research indicated that pets had a number of positive influences on their owners' lives during the pandemic, including:</p>
+            
+            <ul>
+                <li>Companionship during isolation periods</li>
+                <li>Improved mental health and reduced anxiety</li>
+                <li>Increased joy and happiness</li>
+                <li>Encouragement to stay physically active</li>
+                <li>Structure and routine during uncertain times</li>
+            </ul>
+        </section>
+
+        <!-- Policy section -->
+        <section id="policy">
+            <h2>Policy Implications</h2>
+            <p>With the increase in pet ownership, the AMA are encouraging policy makers to consider the needs of companion animals and their owners when considering:</p>
+            
+            <ol>
+                <li>Rental regulations</li>
+                <li>Strata and body corporate rules</li>
+                <li>Accepting animals in public places</li>
+                <li>Pet-friendly public transport options</li>
+            </ol>
+            
+            <div class="contact-form">
+                <h3>Share Your Pandemic Pet Story</h3>
+                <form>
+                    <div class="form-group">
+                        <label for="name">Name:</label>
+                        <input type="text" id="name" name="name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email:</label>
+                        <input type="email" id="email" name="email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="pet-type">Pet Type:</label>
+                        <select id="pet-type" name="pet-type">
+                            <option value="dog">Dog</option>
+                            <option value="cat">Cat</option>
+                            <option value="fish">Fish</option>
+                            <option value="bird">Bird</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="story">Your Story:</label>
+                        <textarea id="story" name="story" rows="4"></textarea>
+                    </div>
+                    <button type="submit">Submit</button>
+                </form>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer section -->
+    <footer>
+        <p>Data Source: <a href="https://animalmedicinesaustralia.org.au/wp-content/uploads/2021/08/AMAU005-PATP-Report21_v1.41_WEB.pdf" target="_blank">Animal Medicines Australia Report</a></p>
+        <p>COS30045 Data Visualisation - Lab 1.1 HTML and CSS Review</p>
+    </footer>
+</body>
+</html>

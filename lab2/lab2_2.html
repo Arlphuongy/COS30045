@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="description" content="Data Visualization">
+    <meta name="keywords" content="HTML, CSS, D3">
+    <meta name="author" content="Arlene">
+    <title>Task 2.2 D3 Bar Binding</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+</head>
+<body>
+    <h1>The D3 Journey starts here...</h1>
+    <h2>Drawing with Data</h2>
+
+    <script>
+        // Step 1: Set up basic variables for SVG dimensions
+        var w = 500;
+        var h = 100;
+        
+        // Step 2: Create a variable to hold our data set
+        var dataset = [14, 5, 26, 23, 9];
+        
+        // Create an SVG element
+        var svg = d3.select("body")
+                    .append("svg")
+                    .attr("width", w)
+                    .attr("height", h);
+        
+        // Step 3: Add rectangles to the chart
+        svg.selectAll("rect")
+           .data(dataset)
+           .enter()
+           .append("rect")
+           .attr("x", function(d, i) {
+               // Position rectangles using the index
+               return i * 21;  // 20px width + 1px padding
+           })
+           .attr("y", 0)
+           .attr("width", 20)
+           .attr("height", function(d) {
+               // Height based on data value
+               return d;
+           });
+        
+        // Step 4: Space out the bars
+        // Create a variable for padding
+        var padding = 1;
+        
+        // Calculate positions to evenly space bars with padding
+        svg.selectAll("rect")
+           .attr("x", function(d, i) {
+               return i * ((w / dataset.length));
+           })
+           .attr("width", (w / dataset.length) - padding);
+        
+        // Step 5: Set height based on data values
+        svg.selectAll("rect")
+           .attr("height", function(d) {
+               return d * 4;  // Multiply by 4 for better visibility
+           });
+        
+        // Step 6: Adjust the y position to make bars grow from bottom
+        svg.selectAll("rect")
+           .attr("y", function(d) {
+               return h - (d * 4);  // Position from bottom
+           });
+        
+        // Add proper padding between bars
+        svg.selectAll("rect")
+           .attr("x", function(d, i) {
+               // This creates an even distribution with padding
+               // i * 21 gives us 20px width + 1px padding
+               return i * (w / dataset.length + padding);
+           });
+        
+        // Make the bars visible with fill color
+        svg.selectAll("rect")
+           .attr("fill", "black");
+        
+        // Make the width calculation more flexible
+        svg.selectAll("rect")
+           .attr("width", function() {
+               return w / dataset.length - padding;
+           });
+    </script>
+</body>
+</html>
