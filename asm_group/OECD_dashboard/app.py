@@ -1,5 +1,5 @@
 import streamlit as st
-from sections import intro, energy, water
+from sections import intro, energy, water, area
 #, environment, area, water, energy, advanced, summary
 st.set_page_config(page_title="OECD Dashboard", layout="wide")
 
