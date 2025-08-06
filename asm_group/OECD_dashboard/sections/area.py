@@ -1,98 +1,113 @@
 import streamlit as st
+import pandas as pd
 import plotly.express as px
 from utils.db import load_table
-import pandas as pd
-
 
 def section_area():
-    st.header("Land Use in Agriculture 🌾")
-    st.markdown("This section highlights global agricultural land patterns, focusing on different land-use types and their distribution across countries.")
+    st.header("🌾 Land Use in Agriculture")
 
-    # Load data
-    area = load_table("area")
+    agri = load_table("agri")
 
-    # Normalize units
-    multiplier_map = {'Millions': 1_000_000, 'Thousands': 1_000, 'Units': 1, 'Billions': 1_000_000_000}
-    area['Value_norm'] = area['Value'] * area['Unit multiplier'].map(multiplier_map).fillna(1)  # normalized to hectares
+    st.markdown("""
+    Understanding how agricultural land is used provides insight into food systems, sustainability, and biodiversity impact.  
+    This section explores trends in **arable land**, **pasture**, **permanent crops**, and **organic farming**.
+    """)
 
-    # Exclude combined/total measures
-    area = area[~area['Measure'].str.contains('total', case=False)]
-    total_like = ['Arable land and permanent crops', 'Agricultural area']
-    land_types_of_interest = sorted([m for m in area['Measure'].unique().tolist() if m not in total_like])
+    # ----------------------------------------
+    # Filter relevant measures
+    # ----------------------------------------
+    land_keywords = [
+        "Arable land", "Permanent pasture", "Permanent crops",
+        "Organic farming", "Total agricultural land area"
+    ]
+    df_land = agri[
+        agri["Measure"].str.contains("|".join(land_keywords), case=False, na=False) &
+        agri["Unit of measure"].str.contains("Hectares", na=False) &
+        (agri["Year"] >= 2012)
+    ]
 
-    # -----------------------------------------------------------
-    # 🥧 Pie Chart: Global Agricultural Land Breakdown
-    # -----------------------------------------------------------
-    st.subheader("🌍 Global Breakdown of Agricultural Land Types")
-    st.markdown("This pie chart shows the proportion of each land-use type (in hectares) contributing to global agricultural area.")
-    global_land = (
-        area[area['Measure'].isin(land_types_of_interest)]
-        .groupby('Measure')['Value_norm']
-        .sum()
-        .reset_index()
-        .sort_values('Value_norm', ascending=False)
+    if df_land.empty:
+        st.warning("No land use data available.")
+        return
+
+    # ----------------------------------------
+    # Select land use type
+    # ----------------------------------------
+    land_types = sorted(df_land["Measure"].unique())
+    selected_type = st.selectbox("🌍 Select Land Use Type", land_types)
+    df_selected = df_land[df_land["Measure"] == selected_type]
+
+    # ----------------------------------------
+    # Global trend over time
+    # ----------------------------------------
+    st.subheader(f"📈 Global Trend: {selected_type}")
+    df_global = df_selected.groupby("Year")["Value"].sum().reset_index()
+    fig_global = px.line(
+        df_global, x="Year", y="Value", markers=True,
+        title=f"Global Area of {selected_type} (2012+)",
+        labels={"Value": "Area (hectares)"}
     )
-    fig_land_pie = px.pie(
-        global_land,
-        names='Measure',
-        values='Value_norm',
-        color_discrete_sequence=px.colors.qualitative.Vivid,
-        title='Global Agricultural Land Composition',
-        hole=0.5,
+    st.plotly_chart(fig_global)
+
+    # ----------------------------------------
+    # Top countries by land area
+    # ----------------------------------------
+    st.subheader(f"🏆 Top Countries by {selected_type} (avg since 2012)")
+    df_top = df_selected.groupby("Reference area")["Value"].mean().nlargest(10).reset_index()
+    fig_top = px.bar(
+        df_top, x="Reference area", y="Value",
+        color="Value", color_continuous_scale="Greens",
+        labels={"Value": "Avg Area (ha)"},
+        title=f"Top 10 Countries with Most {selected_type}"
     )
-    fig_land_pie.update_layout(height=600, width=600)
-    st.plotly_chart(fig_land_pie, use_container_width=True)
+    st.plotly_chart(fig_top)
 
-    # -----------------------------------------------------------
-    # 🥧 Country-level Pie Chart (collapsible)
-    # -----------------------------------------------------------
-    with st.expander("Country-level Land Composition Pie Chart"):
-        selected_country = st.selectbox("Select country", sorted(area['Reference area'].unique().tolist()))
-        sub_country = area[area['Reference area'] == selected_country]
-        country_land = sub_country.groupby('Measure')['Value_norm'].sum().reset_index().sort_values('Value_norm', ascending=False)
-        fig_country_pie = px.pie(
-            country_land, names='Measure', values='Value_norm', 
-            color_discrete_sequence=px.colors.qualitative.Vivid,
-            hole=0.5,
-            title=f"Land Composition in {selected_country}")
-        fig_country_pie.update_layout(height=600, width=600)
-        st.plotly_chart(fig_country_pie, use_container_width=True)
+    # ----------------------------------------
+    
+    # Drill-down by country
+    # ----------------------------------------
+    with st.expander("🔎 Explore Country-wise Land Use"):
+        country_list = sorted(df_selected["Reference area"].dropna().unique())
+        selected_country = st.selectbox("Select Country", country_list)
+        df_country = df_selected[df_selected["Reference area"] == selected_country]
 
-    # -----------------------------------------------------------
-    # 🌐 Choropleth Map: Distribution by Country & Land Type
-    # -----------------------------------------------------------
-    st.subheader("🌐 Land Type Distribution Across Countries")
-    st.markdown("This choropleth map displays how the selected land-use type is distributed by country, based on total land area in hectares.")
+        df_country_year = df_country.groupby("Year")["Value"].mean().reset_index()
 
-    selected_type = st.selectbox("Select land type", land_types_of_interest)
+        fig_country = px.line(
+            df_country_year, x="Year", y="Value", markers=True,
+            title=f"{selected_country} - {selected_type} Over Time",
+            labels={"Value": "Area (hectares)"}
+        )
+        st.plotly_chart(fig_country)
 
-    subset = area[area['Measure'] == selected_type]
-    country_agg = subset.groupby(['CountryCode', 'Reference area'])['Value_norm'].sum().reset_index()
+    # ----------------------------------------
+    # Choropleth Map - separated section
+    # ----------------------------------------
+    st.subheader("🗺️ Global Distribution Map")
+    st.markdown("Visualize land use by country for a selected year.")
+    available_years = sorted(df_selected["Year"].unique(), reverse=True)
+    year_map = st.selectbox("Select Year", available_years, key="land_map_year")
 
-    fig_choro = px.choropleth(
-        country_agg,
-        locations="CountryCode",
-        color="Value_norm",
-        labels={'Value_norm':'Area (hectares)'},
-        hover_name="Reference area",
-        color_continuous_scale="Viridis",
-        title=f"{selected_type} by country (Value_norm in hectares)"
+    df_map = df_selected[df_selected["Year"] == year_map]
+    df_map_grouped = df_map.groupby("Reference area")["Value"].mean().reset_index()
+
+    fig_map = px.choropleth(
+        df_map_grouped, locations="Reference area", locationmode="country names",
+        color="Value", hover_name="Reference area",
+        color_continuous_scale="YlGn",
+        labels={"Value": "Area (hectares)"},
+        title=f"{selected_type} by Country in {year_map}"
     )
-    fig_choro.update_layout(height=600, width=900)
-    st.plotly_chart(fig_choro, use_container_width=True)
+    st.plotly_chart(fig_map)
 
-    # -----------------------------------------------------------
-    # 📈 Time-Series Trend: Land Type Over Time (Multi-line comparison)
-    # -----------------------------------------------------------
-    st.subheader("📈 Trend Over Time by Land Type")
-    st.markdown("This line chart compares trends in different land-use types from 2000 to 2020.")
-
-    selected_ts_types = st.multiselect(
-        "Select land types for trend", land_types_of_interest, default=land_types_of_interest[:2], key="ts"
+    # ----------------------------------------
+    # Download option
+    # ----------------------------------------
+    st.markdown("### 📥 Download This Dataset")
+    csv = df_selected.to_csv(index=False)
+    st.download_button(
+        label="⬇️ Download CSV",
+        data=csv,
+        file_name=f"{selected_type.lower().replace(' ', '_')}_area.csv",
+        mime='text/csv'
     )
-    ts_data = area[(area['Measure'].isin(selected_ts_types)) & (area['Year'].between(2000, 2020))].groupby(['Year','Measure'])['Value_norm'].sum().reset_index()
-
-    fig_ts = px.line(ts_data, x='Year', y='Value_norm', color='Measure', markers=True,
-                     color_discrete_sequence=px.colors.qualitative.Vivid,
-                     title="Global Trend Over Time by Land Type")
-    st.plotly_chart(fig_ts, use_container_width=True)
